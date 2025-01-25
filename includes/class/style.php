@@ -46,8 +46,26 @@ class Style
 	{
 		global $template;
 
-		$template = new Template(ROOT_PATH . 'styles/' . $this->path . '/');
+		$style_path = ROOT_PATH . 'styles/' . $this->path . '/';
 
+		if (!is_dir($style_path)) {
+			// 风格目录不存在，重置为默认风格
+			$this->style = $this->_config['default_style'];
+			$this->path = $this->data[$this->style]['path'];
+			$this->name = $this->data[$this->style]['name'];
+
+			if ($this->_userdata['user_id'] != ANONYMOUS) {
+				// 更新用户的风格设置
+				$sql = 'UPDATE ' . USERS_TABLE . ' 
+					SET user_style = ' . $this->style . '
+					WHERE user_id = ' . $this->_userdata['user_id'];
+				$this->_db->sql_query($sql);
+			}
+
+			$style_path = ROOT_PATH . 'styles/' . $this->path . '/';
+		}
+
+		$template = new Template($style_path);
 	}
 
 	function Data()
